@@ -1,0 +1,5 @@
+# 钉钉考勤与薪酬管理系统
+node_modules/
+.next/
+.env*.local
+*.log
