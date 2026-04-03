@@ -4,11 +4,12 @@ import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import { useAuthStore, ROLE_CONFIG } from '@/store/auth'
+import { useLicenseStore } from '@/store/license'
 import { Permission } from '@/types'
 import {
   LayoutDashboard, Users, ClipboardList, Banknote,
   BarChart3, Settings, ChevronLeft, Building2, LogOut,
-  ShieldCheck, UserCircle
+  ShieldCheck, UserCircle, Zap, Clock, Crown
 } from 'lucide-react'
 
 interface NavItem {
@@ -40,6 +41,9 @@ export function Sidebar() {
 
   const user = currentUser()
   const roleConfig = ROLE_CONFIG.find(r => r.role === user?.role)
+  const { status: licStatus, daysLeft, isActivated, plan: licPlan } = useLicenseStore()
+  const ls = licStatus()
+  const activated = isActivated()
 
   const handleLogout = () => {
     logout()
@@ -153,6 +157,50 @@ export function Sidebar() {
             </div>
           )}
         </div>
+      )}
+
+      {/* License Status Widget */}
+      {!sidebarCollapsed && (
+        <Link href="/activate" className={cn(
+          'mx-3 mb-2 p-3 rounded-xl flex items-center gap-2.5 transition-all',
+          activated
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100'
+            : ls === 'expired'
+            ? 'bg-red-50 border border-red-200 animate-pulse'
+            : 'bg-gradient-to-r from-primary-50 to-indigo-50 border border-primary-100'
+        )}>
+          <div className={cn(
+            'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+            activated ? 'bg-green-100' : ls === 'expired' ? 'bg-red-100' : 'bg-primary-100'
+          )}>
+            {activated
+              ? <Crown size={15} className="text-green-600" />
+              : ls === 'expired'
+              ? <Zap size={15} className="text-red-500" />
+              : <Clock size={15} className="text-primary-500" />
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            {activated ? (
+              <>
+                <div className="text-xs font-bold text-green-700 truncate">
+                  {licPlan === 'enterprise' ? '企业版' : licPlan === 'professional' ? '专业版' : '标准版'}
+                </div>
+                <div className="text-xs text-green-500">已激活 · 长期有效</div>
+              </>
+            ) : ls === 'expired' ? (
+              <>
+                <div className="text-xs font-bold text-red-600">试用已到期</div>
+                <div className="text-xs text-red-400">点击购买激活</div>
+              </>
+            ) : (
+              <>
+                <div className="text-xs font-bold text-primary-700">试用版</div>
+                <div className="text-xs text-primary-400">剩余 {daysLeft()} 天 · 点击激活</div>
+              </>
+            )}
+          </div>
+        </Link>
       )}
 
       {/* Collapse + Logout */}
