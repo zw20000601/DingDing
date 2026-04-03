@@ -223,3 +223,61 @@ export interface ReportFilter {
   departmentId: string | null
   employeeId: string | null
 }
+
+// ============ 用户角色与权限 ============
+export type UserRole = 'admin' | 'hr' | 'finance' | 'employee'
+
+export interface RolePermission {
+  role: UserRole
+  label: string
+  description: string
+  color: string
+  permissions: Permission[]
+}
+
+export type Permission =
+  | 'dashboard.view'
+  | 'employee.view'
+  | 'employee.create'
+  | 'employee.edit'
+  | 'employee.delete'
+  | 'attendance.view'
+  | 'attendance.edit'
+  | 'attendance.import'
+  | 'attendance.sync'
+  | 'payroll.view'
+  | 'payroll.calculate'
+  | 'payroll.review'
+  | 'payroll.issue'
+  | 'reports.view'
+  | 'reports.export'
+  | 'settings.view'
+  | 'settings.edit'
+  | 'admin.users'
+  | 'my.attendance'
+  | 'my.payroll'
+
+// ============ 系统用户 ============
+export interface SystemUser {
+  id: string
+  username: string
+  passwordHash: string   // 生产环境应 bcrypt，演示使用 base64
+  displayName: string
+  role: UserRole
+  employeeId: string | null   // 关联员工档案（普通员工必填）
+  departmentId: string | null
+  email: string
+  phone: string
+  avatar: string | null
+  enabled: boolean
+  lastLogin: string | null
+  createdAt: string
+  createdBy: string
+}
+
+// ============ 登录会话 ============
+export interface AuthSession {
+  user: SystemUser
+  loginAt: string
+  expiresAt: string
+}
